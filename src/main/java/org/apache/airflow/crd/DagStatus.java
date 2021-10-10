@@ -1,9 +1,12 @@
 package org.apache.airflow.crd;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DagStatus {
 
     public enum State {
         CREATED,
+        UPDATED,
         ALREADY_PRESENT,
         PROCESSING,
         ERROR,
@@ -15,6 +18,9 @@ public class DagStatus {
     private boolean error;
 
     private String message;
+
+    @JsonProperty("context_hash")
+    private String contextHash;
 
     public State getState() {
         return state;
@@ -38,5 +44,13 @@ public class DagStatus {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getContextHash() {
+        return contextHash;
+    }
+
+    public void setContextHash(String contextHash) {
+        this.contextHash = contextHash;
     }
 }

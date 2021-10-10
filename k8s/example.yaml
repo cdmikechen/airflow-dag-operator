@@ -1,7 +1,7 @@
 apiVersion: airflow.apache.org/v1
 kind: Dag
 metadata:
-  name: example_bash_operator
+  name: example-bash-operator
   namespace: bigdata
 spec:
   type: dag_file
