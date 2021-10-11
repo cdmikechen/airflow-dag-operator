@@ -13,6 +13,9 @@ public class DagSpec {
     @JsonProperty("file_name")
     private String fileName;
 
+    @JsonProperty("dag_name")
+    private String dagName;
+
     private String content;
 
     public DagType getType() {
@@ -33,6 +36,14 @@ public class DagSpec {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public String getDagName() {
+        return dagName;
+    }
+
+    public void setDagName(String dagName) {
+        this.dagName = dagName;
     }
 
     public void setFileName(String fileName) {

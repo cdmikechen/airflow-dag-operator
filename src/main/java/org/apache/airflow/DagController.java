@@ -27,7 +27,8 @@ public class DagController implements ResourceController<Dag> {
     public DeleteControl deleteResource(Dag dag, Context<Dag> context) {
         try {
             log.info("Queue delete dag task [{}] ...", dag.getMetadata().getName());
-            dagQueue.push(new DagTask(dag.getMetadata().getName(), dag.getSpec(), ControlType.delete));
+            dagQueue.push(new DagTask(dag.getMetadata().getName(), dag.getMetadata().getResourceVersion(),
+                    dag.getSpec(), ControlType.delete));
         } catch (InterruptedException e) {
             log.error("Error when queue task", e);
         }
@@ -38,7 +39,8 @@ public class DagController implements ResourceController<Dag> {
     public UpdateControl<Dag> createOrUpdateResource(Dag dag, Context<Dag> context) {
         try {
             log.info("Queue create/update dag task [{}] ...", dag.getMetadata().getName());
-            dagQueue.push(new DagTask(dag.getMetadata().getName(), dag.getSpec(), ControlType.create));
+            dagQueue.push(new DagTask(dag.getMetadata().getName(), dag.getMetadata().getResourceVersion(),
+                    dag.getSpec(), ControlType.create));
         } catch (InterruptedException e) {
             log.error("Error when queue task", e);
         }

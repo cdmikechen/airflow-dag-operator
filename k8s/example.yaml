@@ -5,7 +5,7 @@ metadata:
   namespace: bigdata
 spec:
   type: dag_file
-  file_name: example_bash_operator
+  dag_name: example_bash_operator
   content: |
     """Example DAG demonstrating the usage of the BashOperator."""
 
@@ -69,3 +69,15 @@ spec:
 
     if __name__ == "__main__":
         dag.cli()
+---
+apiVersion: airflow.apache.org/v1
+kind: Dag
+metadata:
+  name: example-other-file
+  namespace: bigdata
+spec:
+  type: file
+  path: test_file/
+  file_name: test_file.txt
+  content: |
+    test file content

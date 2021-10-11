@@ -5,25 +5,32 @@ import org.apache.airflow.type.ControlType;
 
 public class DagTask {
 
-    public DagTask(String name, DagSpec spec, ControlType type) {
+    public DagTask(String name, String version, DagSpec spec, ControlType type) {
         this.name = name;
+        this.version = version;
         this.spec = spec;
         this.type = type;
     }
+
+    public final String version;
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    private String name;
+    private final String name;
 
     private DagSpec spec;
 
     private ControlType type;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public long getVersionNum() {
+        return Long.parseLong(version);
+    }
 
     public DagSpec getSpec() {
         return spec;
