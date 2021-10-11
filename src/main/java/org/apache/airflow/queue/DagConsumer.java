@@ -1,17 +1,20 @@
 package org.apache.airflow.queue;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.BlockingQueue;
+
 import org.apache.airflow.AirflowConfig;
 import org.apache.airflow.crd.DagSpec;
 import org.apache.airflow.type.ControlType;
 import org.apache.airflow.type.DagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
 
 public class DagConsumer extends Thread {
 
@@ -66,7 +69,8 @@ public class DagConsumer extends Thread {
 
         log.info("Delete dag {} in path {}", name, filePath);
         File deleteFile = new File(filePath);
-        if (deleteFile.exists()) deleteFile.delete();
+        if (deleteFile.exists())
+            deleteFile.delete();
     }
 
     /**
@@ -104,10 +108,10 @@ public class DagConsumer extends Thread {
 
         try {
             // create folder if not exists
-            File folderFile = new File(dagPath);
-            if (!folderFile.exists()) {
+            Path folderFile = Paths.get(dagPath);
+            if (!Files.exists(folderFile)) {
                 log.debug("Folder not exists, create folder {} ...", dagPath);
-                folderFile.mkdirs();
+                Files.createDirectories(folderFile);
             }
 
             // write file overwrite
@@ -121,12 +125,14 @@ public class DagConsumer extends Thread {
     /**
      * Get dag file name. If fileName is null, use crd meta name
      *
-     * @param name     dag crd meta name
+     * @param name dag crd meta name
      * @param fileName dag file name
      */
     private String getDagFile(String name, String fileName) {
-        if (fileName == null) fileName = name;
-        if (!fileName.startsWith(".py")) fileName = fileName + ".py";
+        if (fileName == null)
+            fileName = name;
+        if (!fileName.startsWith(".py"))
+            fileName = fileName + ".py";
         return fileName;
     }
 
@@ -139,14 +145,16 @@ public class DagConsumer extends Thread {
     private String getFilePath(String path) {
         // dags folder path
         String folderPath = airflowConfig.path();
-        if (!folderPath.endsWith("/")) folderPath = folderPath + "/";
+        if (!folderPath.endsWith("/"))
+            folderPath = folderPath + "/";
         // dag file path
         StringBuilder dagPath = new StringBuilder();
         dagPath.append(folderPath);
 
         if (path != null && !"".equals(path)) {
             dagPath.append(path.startsWith("/") ? path.substring(1) : path);
-            if (!path.endsWith("/")) dagPath.append("/");
+            if (!path.endsWith("/"))
+                dagPath.append("/");
         }
         return dagPath.toString();
     }
@@ -157,7 +165,7 @@ public class DagConsumer extends Thread {
     private void bufferedWriter(String filepath, String content) throws IOException {
         log.debug("Saving dag file to {} ...", filepath);
         try (FileWriter fileWriter = new FileWriter(filepath);
-             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
             bufferedWriter.write(content);
         }
     }

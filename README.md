@@ -21,12 +21,16 @@ We can run our application in dev mode that enables live coding using:
 
 ## Quarkus Image Build
 
-If we use OpenShift, we can use `BuildConfig` to build a native image. Otherwise, we can create a native executable using:
+If we use OpenShift, we can use `BuildConfig` to build a native image. 
+Otherwise, we can create a native executable using:
 ```shell script
 ./mvnw package -Pnative
+# if use macOS, you should use -Dquarkus.native.container-build=true to build quarkus in docker with a linux environment
+docker build -f src/main/docker/Dockerfile.native -t quarkus/airflow-dag-operator .
 ```
 
 Or, if we don't have GraalVM installed, we can run the native executable build in a container using:
 ```shell script
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
+docker build -f src/main/docker/Dockerfile.native -t quarkus/airflow-dag-operator .
 ```

@@ -2,17 +2,18 @@ package org.apache.airflow;
 
 import javax.inject.Inject;
 
-import io.javaoperatorsdk.operator.api.Context;
-import io.javaoperatorsdk.operator.api.Controller;
-import io.javaoperatorsdk.operator.api.DeleteControl;
-import io.javaoperatorsdk.operator.api.ResourceController;
-import io.javaoperatorsdk.operator.api.UpdateControl;
 import org.apache.airflow.crd.Dag;
 import org.apache.airflow.queue.DagQueue;
 import org.apache.airflow.queue.DagTask;
 import org.apache.airflow.type.ControlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.javaoperatorsdk.operator.api.Context;
+import io.javaoperatorsdk.operator.api.Controller;
+import io.javaoperatorsdk.operator.api.DeleteControl;
+import io.javaoperatorsdk.operator.api.ResourceController;
+import io.javaoperatorsdk.operator.api.UpdateControl;
 
 @Controller(namespaces = Controller.WATCH_CURRENT_NAMESPACE)
 public class DagController implements ResourceController<Dag> {

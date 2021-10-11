@@ -1,7 +1,8 @@
 package org.apache.airflow.crd;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.airflow.type.DagType;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DagSpec {
 

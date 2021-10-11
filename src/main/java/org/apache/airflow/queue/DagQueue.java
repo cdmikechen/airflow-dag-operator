@@ -1,12 +1,13 @@
 package org.apache.airflow.queue;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+
+import javax.enterprise.context.ApplicationScoped;
+
 import org.apache.airflow.AirflowConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 @ApplicationScoped
 public class DagQueue {
