@@ -6,7 +6,7 @@ metadata:
 spec:
   type: dag_file
   file_name: example_bash_operator
-  context: |
+  content: |
     """Example DAG demonstrating the usage of the BashOperator."""
 
     from datetime import timedelta

@@ -20,6 +20,7 @@ We can run our application in dev mode that enables live coding using:
 ```
 
 ## Quarkus Image Build
+
 If we use OpenShift, we can use `BuildConfig` to build a native image. Otherwise, we can create a native executable using:
 ```shell script
 ./mvnw package -Pnative

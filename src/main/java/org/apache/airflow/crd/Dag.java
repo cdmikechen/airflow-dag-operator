@@ -7,6 +7,6 @@ import io.fabric8.kubernetes.model.annotation.Version;
 
 @Group("airflow.apache.org")
 @Version("v1")
-public class Dag extends CustomResource<DagSpec, DagStatus> implements Namespaced {
+public class Dag extends CustomResource<DagSpec, Void> implements Namespaced {
 
 }

@@ -1,29 +1,24 @@
 package org.apache.airflow.crd;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.airflow.type.DagType;
 
 public class DagSpec {
 
-    public enum Type {
-        file,
-        dag_file,
-        dag_yaml
-    }
-
-    private Type type = Type.dag_file;
+    private DagType type = DagType.dag_file;
 
     private String path;
 
     @JsonProperty("file_name")
     private String fileName;
 
-    private String context;
+    private String content;
 
-    public Type getType() {
+    public DagType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(DagType type) {
         this.type = type;
     }
 
@@ -43,11 +38,11 @@ public class DagSpec {
         this.fileName = fileName;
     }
 
-    public String getContext() {
-        return context;
+    public String getContent() {
+        return content;
     }
 
-    public void setContext(String context) {
-        this.context = context;
+    public void setContent(String content) {
+        this.content = content;
     }
 }

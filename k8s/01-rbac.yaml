@@ -1,0 +1,68 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: airflow-dag-operator
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: airflow-dag-operator
+rules:
+  - apiGroups: [""]
+    resources: [namespaces]
+    verbs: [get, list, watch]
+
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list, watch]
+
+  # Kopf: posting the events about the handlers progress/errors.
+  - apiGroups: [events.k8s.io]
+    resources: [events]
+    verbs: [create]
+
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create]
+
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions/status
+      - customresourcedefinitions
+    verbs: [get, list, watch, patch, create, update, delete, deletecollection]
+
+  # Application: watching & handling for the custom resource we declare.
+  - apiGroups: [airflow.apache.org]
+    resources:
+      - dags
+      - dags/status
+    verbs: ["*"]
+
+  # Access to the built-in resources the operator manages
+  - apiGroups: [""]
+    resources: [secrets, configmaps, services]
+    verbs: [get, list, watch, patch, create, update, delete]
+
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: [get, list, watch, patch, create, update, delete]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: airflow-dag-operator
+subjects:
+  - kind: User
+    name: system:serviceaccount:bigdata:airflow-dag-operator
+    namespace: bigdata
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: bigdata
+roleRef:
+  kind: ClusterRole
+  name: airflow-dag-operator
+  apiGroup: rbac.authorization.k8s.io
