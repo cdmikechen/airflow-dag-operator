@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DagSpec {
 
+    public DagSpec() {
+    }
+
     private DagType type = DagType.dag_file;
 
     private String path;

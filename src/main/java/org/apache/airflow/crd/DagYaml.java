@@ -1,10 +1,13 @@
 package org.apache.airflow.crd;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DagYaml {
+
+    public DagYaml() {
+    }
 
     private String title;
 
@@ -25,6 +28,9 @@ public class DagYaml {
     private DefaultArg defaultArgs;
 
     public static class DefaultArg {
+
+        public DefaultArg() {
+        }
 
         private String owner;
 
@@ -255,6 +261,9 @@ public class DagYaml {
 
     public static class Config {
 
+        public Config() {
+        }
+
         private String name;
 
         private String value;
@@ -347,6 +356,9 @@ public class DagYaml {
 
     /* ------------------------ task ------------------------ */
     public static class Task {
+
+        public Task() {
+        }
 
         @JsonProperty("task_id")
         private String taskId;
