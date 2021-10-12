@@ -18,6 +18,9 @@ public class DagSpec {
 
     private String content;
 
+    @JsonProperty("dag_yaml")
+    private DagYaml dagYaml;
+
     public DagType getType() {
         return type;
     }
@@ -56,5 +59,13 @@ public class DagSpec {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public DagYaml getDagYaml() {
+        return dagYaml;
+    }
+
+    public void setDagYaml(DagYaml dagYaml) {
+        this.dagYaml = dagYaml;
     }
 }

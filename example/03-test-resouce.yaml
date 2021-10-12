@@ -81,3 +81,64 @@ spec:
   file_name: test_file.txt
   content: |
     test file content
+---
+apiVersion: airflow.apache.org/v1
+kind: Dag
+metadata:
+  name: tutorial-yaml
+  namespace: bigdata
+spec:
+  type: dag_yaml
+  dag_name: tutorial
+  dag_yaml:
+    title: |
+      ### Tutorial Documentation
+      Documentation that goes along with the Airflow tutorial located
+      [here](https://airflow.apache.org/tutorial.html)
+    import_libs:
+      - "from datetime import timedelta"
+      - "from airflow import DAG"
+      - "from airflow.operators.bash import BashOperator"
+      - "from airflow.utils.dates import days_ago"
+    default_args:
+      owner: '''airflow'''
+      depends_on_past: false
+      email:
+        - "airflow@example.com"
+      email_on_failure: false
+      email_on_retry: false
+      retries: 1
+      retry_delay: "timedelta(minutes=5)"
+      start_date: "days_ago(2)"
+    description: "A simple tutorial DAG"
+    schedule_interval: "timedelta(days=1)"
+    tags:
+      - "example"
+    python_codes: |
+      templated_command = """
+      {% for i in range(5) %}
+          echo "{{ ds }}"
+          echo "{{ macros.ds_add(ds, 7)}}"
+          echo "{{ params.my_param }}"
+      {% endfor %}
+      """
+    tasks:
+      - task_id: "print_date"
+        operator: "BashOperator"
+        bash_command: '''date'''
+      - task_id: "sleep"
+        operator: "BashOperator"
+        bash_command: '''sleep 5'''
+        depends_on_past: false
+        retries: 3
+        dependencies:
+          - "print_date"
+      - task_id: "templated"
+        operator: "BashOperator"
+        depends_on_past: false
+        bash_command: "templated_command"
+        params:
+          - name: "my_param"
+            value: '''Parameter I passed in'''
+        dependencies:
+          - "print_date"

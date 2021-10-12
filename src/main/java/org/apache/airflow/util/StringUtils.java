@@ -35,4 +35,8 @@ public class StringUtils {
         }
         return object1.equals(object2);
     }
+
+    public static boolean notBlank(String str) {
+        return str != null && !"".equals(str);
+    }
 }

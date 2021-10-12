@@ -123,8 +123,8 @@ public class DagService {
 
         switch (type) {
             case dag_yaml:
-                // todo transform yaml to dag
-                return "";
+                DagTemplate dagTemplate = new DagTemplate(task.getName(), task.getSpec().getDagYaml());
+                return dagTemplate.createDagContent();
             case file:
             case dag_file:
             default:
