@@ -9,7 +9,8 @@ import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.airflow.AirflowConfig;
-import org.apache.airflow.StringUtils;
+import org.apache.airflow.service.DagService;
+import org.apache.airflow.util.StringUtils;
 import org.apache.airflow.cache.DagCache;
 import org.apache.airflow.cache.DagInstance;
 import org.apache.airflow.crd.DagSpec;
@@ -22,14 +23,14 @@ public class DagConsumer extends Thread {
 
     private static final Logger log = LoggerFactory.getLogger(DagConsumer.class);
 
-    private final AirflowConfig airflowConfig;
+    private final DagService dagService;
 
     private final BlockingQueue<DagTask> dagQueue;
 
     private final int thread;
 
-    public DagConsumer(AirflowConfig airflowConfig, BlockingQueue<DagTask> dagQueue, int thread) {
-        this.airflowConfig = airflowConfig;
+    public DagConsumer(DagService dagService, BlockingQueue<DagTask> dagQueue, int thread) {
+        this.dagService = dagService;
         this.dagQueue = dagQueue;
         this.thread = thread;
     }
@@ -94,24 +95,16 @@ public class DagConsumer extends Thread {
                 case dag_yaml:
                 case dag_file:
                 default:
-                    filePath.append(getFilePath(spec.getPath())).append(getDagFile(name, spec.getDagName()));
+                    filePath.append(dagService.getPath(spec.getPath()))
+                            .append(dagService.getDagFile(name, spec.getDagName()));
                     break;
             }
         }
 
         if (filePath.length() > 0) {
             log.info("Delete dag {} in path {}", name, filePath);
-            deleteFilePath(filePath.toString());
+            dagService.deleteFilePath(filePath.toString());
         }
-    }
-
-    /**
-     * Delete file
-     */
-    private void deleteFilePath(String deletePath) throws IOException {
-        Path deleteFile = Paths.get(deletePath);
-        if (Files.exists(deleteFile))
-            Files.delete(deleteFile);
     }
 
     /**
@@ -122,7 +115,7 @@ public class DagConsumer extends Thread {
         String name = task.getName();
 
         // get file path and name
-        FilePath fp = getFilePath(task);
+        FilePath fp = dagService.getFilePath(task);
         String filePath = fp.getPath();
         String fileName = fp.getFileName();
         DagInstance di = new DagInstance(name, task.getVersionNum())
@@ -131,7 +124,7 @@ public class DagConsumer extends Thread {
                 .setFileName(fileName);
 
         // get file content
-        String content = getFileContent(task);
+        String content = dagService.getFileContent(task);
         di.setContent(content);
 
         // create file
@@ -150,11 +143,11 @@ public class DagConsumer extends Thread {
         String name = task.getName();
 
         // get file path and name
-        FilePath fp = getFilePath(task);
+        FilePath fp = dagService.getFilePath(task);
         String filePath = fp.getPath();
         String fileName = fp.getFileName();
         // get file content
-        String newContent = getFileContent(task);
+        String newContent = dagService.getFileContent(task);
 
         DagInstance di = new DagInstance(name, task.getVersionNum())
                 .setType(spec.getType())
@@ -168,69 +161,30 @@ public class DagConsumer extends Thread {
         if (!oldPath.equals(newPath)) {
             // 1. path or file name had been changed, need to remove old file
             log.info("Need to delete old dag {} in path {}", name, oldPath);
-            deleteFilePath(oldPath);
+            dagService.deleteFilePath(oldPath);
 
             log.info("Create new dag {} in path {}", name, oldPath);
             createFileContent(filePath, fileName, newContent);
         } else {
-            // 2. content had been changed, just use createFile method
-            if (StringUtils.equals(newContent, oldTask.getContent())) {
-                log.debug("There is no difference between old and new contents!");
-            } else {
-                log.info("The two contents are different, and the file needs to be rewritten!");
+            Path newFile = Paths.get(newPath);
+            if (!Files.exists(newFile)) {
+                // 2. if file not exists, create it
+                log.info("Can not find exists dag, create it!");
                 createFileContent(filePath, fileName, newContent);
+            } else {
+                // 3. content had been changed, just use createFile method
+                if (StringUtils.equals(newContent, oldTask.getContent())) {
+                    log.debug("There is no difference between old and new contents!");
+                } else {
+                    log.info("The two contents are different, and the file needs to be rewritten!");
+                    createFileContent(filePath, fileName, newContent);
+                }
             }
         }
 
         // save cache
         log.trace("Saving to cache {}", di);
         DagCache.INSTANCE.cache(name, di);
-    }
-
-    /**
-     * get dag file path and file name
-     */
-    private FilePath getFilePath(DagTask task) {
-        DagSpec spec = task.getSpec();
-        String name = task.getName();
-        DagType type = spec.getType();
-
-        String filePath = getFilePath(spec.getPath());
-        String fileName;
-        switch (type) {
-            case file:
-                // file name
-                fileName = spec.getFileName();
-                if (fileName == null || "".equals(fileName))
-                    throw new IllegalArgumentException("FileName can not be null!");
-                break;
-            case dag_yaml:
-            case dag_file:
-            default:
-                // dag python file name
-                fileName = getDagFile(name, spec.getDagName());
-                break;
-        }
-
-        return new FilePath(filePath, fileName);
-    }
-
-    /**
-     * get dag or file content
-     */
-    private String getFileContent(DagTask task) {
-        DagSpec spec = task.getSpec();
-        DagType type = spec.getType();
-
-        switch (type) {
-            case dag_yaml:
-                // todo transform yaml to dag
-                return "";
-            case file:
-            case dag_file:
-            default:
-                return spec.getContent();
-        }
     }
 
     /**
@@ -259,43 +213,6 @@ public class DagConsumer extends Thread {
     }
 
     /**
-     * Get dag file name. If fileName is null, use crd meta name
-     *
-     * @param name     dag crd meta name
-     * @param fileName dag file name
-     */
-    private String getDagFile(String name, String fileName) {
-        if (fileName == null || "".equals(fileName))
-            fileName = name;
-        if (!fileName.startsWith(".py"))
-            fileName = fileName + ".py";
-        return fileName;
-    }
-
-    /**
-     * Get file path
-     *
-     * @param path dag path in dag resource
-     * @return {dags_folder}/{custom_path}/
-     */
-    private String getFilePath(String path) {
-        // dags folder path
-        String folderPath = airflowConfig.path();
-        if (!folderPath.endsWith("/"))
-            folderPath = folderPath + "/";
-        // dag file path
-        StringBuilder dagPath = new StringBuilder();
-        dagPath.append(folderPath);
-
-        if (path != null && !"".equals(path)) {
-            dagPath.append(path.startsWith("/") ? path.substring(1) : path);
-            if (!path.endsWith("/"))
-                dagPath.append("/");
-        }
-        return dagPath.toString();
-    }
-
-    /**
      * write dag
      */
     private void bufferedWriter(String filepath, String content) throws IOException {
@@ -304,36 +221,5 @@ public class DagConsumer extends Thread {
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
             bufferedWriter.write(content);
         }
-    }
-}
-
-class FilePath {
-
-    String path;
-
-    String fileName;
-
-    public FilePath() {
-    }
-
-    public FilePath(String path, String fileName) {
-        this.path = path;
-        this.fileName = fileName;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 }

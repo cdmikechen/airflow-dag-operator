@@ -1,4 +1,4 @@
-package org.apache.airflow;
+package org.apache.airflow.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +23,9 @@ public class StringUtils {
         return hexString.toString();
     }
 
+    /**
+     * compare if two strings are same
+     */
     public static boolean equals(final Object object1, final Object object2) {
         if (object1 == object2) {
             return true;
