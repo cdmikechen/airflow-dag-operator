@@ -1,9 +1,16 @@
 package org.apache.airflow.service;
 
-import io.fabric8.kubernetes.api.model.KubernetesResourceList;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.airflow.AirflowConfig;
 import org.apache.airflow.crd.Dag;
 import org.apache.airflow.crd.DagSpec;
@@ -13,15 +20,10 @@ import org.apache.airflow.type.DagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import io.fabric8.kubernetes.api.model.KubernetesResourceList;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 
 @ApplicationScoped
 public class DagService {
@@ -76,11 +78,10 @@ public class DagService {
         return new FilePath(filePath, fileName);
     }
 
-
     /**
      * Get dag file name. If fileName is null, use crd meta name
      *
-     * @param name     dag crd meta name
+     * @param name dag crd meta name
      * @param fileName dag file name
      */
     public String getDagFile(String name, String fileName) {

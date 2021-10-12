@@ -8,14 +8,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.airflow.AirflowConfig;
-import org.apache.airflow.service.DagService;
-import org.apache.airflow.util.StringUtils;
 import org.apache.airflow.cache.DagCache;
 import org.apache.airflow.cache.DagInstance;
 import org.apache.airflow.crd.DagSpec;
+import org.apache.airflow.service.DagService;
 import org.apache.airflow.type.ControlType;
 import org.apache.airflow.type.DagType;
+import org.apache.airflow.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,8 +83,7 @@ public class DagConsumer extends Thread {
                     .ifPresentOrElse(
                             dagInstance -> filePath.append(dagInstance.getFilePath()),
                             () -> log.warn("Can not delete dag {}, current version {}, cache version {}",
-                                    name, task.getVersion(), DagCache.INSTANCE.getInstance(name).getVersion())
-                    );
+                                    name, task.getVersion(), DagCache.INSTANCE.getInstance(name).getVersion()));
         } else {
             DagSpec spec = task.getSpec();
             DagType type = spec.getType();
@@ -190,9 +188,9 @@ public class DagConsumer extends Thread {
     /**
      * Create dag file
      *
-     * @param path     file path
+     * @param path file path
      * @param fileName file name
-     * @param content  file content
+     * @param content file content
      */
     private void createFileContent(String path, String fileName, String content) {
         log.info("Create {} stored in {} and content \n{}", fileName, path, content);
@@ -218,7 +216,7 @@ public class DagConsumer extends Thread {
     private void bufferedWriter(String filepath, String content) throws IOException {
         log.debug("Saving dag file to {} ...", filepath);
         try (FileWriter fileWriter = new FileWriter(filepath);
-             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
             bufferedWriter.write(content);
         }
     }

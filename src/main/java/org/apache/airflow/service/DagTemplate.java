@@ -1,11 +1,11 @@
 package org.apache.airflow.service;
 
-import org.apache.airflow.crd.DagYaml;
-import org.apache.airflow.util.StringUtils;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.airflow.crd.DagYaml;
+import org.apache.airflow.util.StringUtils;
 
 /**
  * Creating DAG content based on yaml
@@ -79,7 +79,8 @@ public class DagTemplate {
             if (!collectEmpty(task.getParams())) {
                 content.append("    params={ ");
                 for (int j = 0, size = task.getParams().size(); j < size; j++) {
-                    if (j > 0) content.append(", ");
+                    if (j > 0)
+                        content.append(", ");
                     DagYaml.Config param = task.getParams().get(j);
                     content.append("'").append(param.getName()).append("': ").append(param.getValue());
                 }
@@ -178,7 +179,8 @@ public class DagTemplate {
      * check if collection is empty
      */
     private <T> boolean collectEmpty(Collection<T> list) {
-        if (list == null) return true;
+        if (list == null)
+            return true;
         return list.isEmpty();
     }
 }

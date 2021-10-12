@@ -1,13 +1,15 @@
 package org.apache.airflow.service;
 
-import io.quarkus.runtime.StartupEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.runtime.StartupEvent;
 
 /**
  * The purpose of this service is to remove useless DAG files based on existing CRDs.
