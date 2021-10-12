@@ -45,4 +45,13 @@ helm dep update
 helm lint
 ```
 
+Deploy Chart
+```shell script
+# install
+helm install -f values-test.yaml airflow -n airflow .
+
+# uninstall
+helm uninstall airflow
+```
+
 

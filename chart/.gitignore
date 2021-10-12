@@ -7,3 +7,5 @@ repository
 
 # Chart dependencies
 **/charts/*.tgz
+
+values-test.yaml

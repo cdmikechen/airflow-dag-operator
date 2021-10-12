@@ -112,6 +112,9 @@ spec:
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) (semverCompare "<2.0.0" .Values.airflowVersion) }}
         {{- include "git_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
         {{- end }}
+        {{- if and (.Values.dags.crdSync.enabled) (not .Values.dags.persistence.enabled) (semverCompare "<2.0.0" .Values.airflowVersion) }}
+        {{- include "crd_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
+        {{- end }}
         {{- if .Values.webserver.extraInitContainers }}
         {{- toYaml .Values.webserver.extraInitContainers | nindent 8 }}
         {{- end }}
@@ -144,7 +147,7 @@ spec:
               subPath: airflow_local_settings.py
               readOnly: true
 {{- end }}
-{{- if and (semverCompare "<2.0.0" .Values.airflowVersion) (or .Values.dags.gitSync.enabled .Values.dags.persistence.enabled) }}
+{{- if and (semverCompare "<2.0.0" .Values.airflowVersion) (or .Values.dags.gitSync.enabled .Values.dags.persistence.enabled .Values.dags.crdSync.enabled) }}
             {{- include "airflow_dags_mount" . | nindent 12 }}
 {{- end }}
 {{- if .Values.logs.persistence.enabled }}
@@ -191,6 +194,9 @@ spec:
 {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) (semverCompare "<2.0.0" .Values.airflowVersion) }}
 {{- include "git_sync_container" . | indent 8 }}
 {{- end }}
+{{- if and (.Values.dags.crdSync.enabled) (not .Values.dags.persistence.enabled) (semverCompare "<2.0.0" .Values.airflowVersion) }}
+{{- include "crd_sync_container" . | indent 8 }}
+{{- end }}
 {{- if .Values.webserver.extraContainers }}
 {{- toYaml .Values.webserver.extraContainers | nindent 8 }}
 {{- end }}
@@ -214,6 +220,9 @@ spec:
         {{- if  .Values.dags.gitSync.sshKeySecret }}
         {{- include "git_sync_ssh_key_volume" . | indent 8 }}
         {{- end }}
+        {{- else if .Values.dags.crdSync.enabled }}
+        - name: dags
+          emptyDir: {}
         {{- end }}
         {{- end }}
         {{- if .Values.logs.persistence.enabled }}

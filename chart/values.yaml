@@ -76,6 +76,10 @@ images:
     repository: k8s.gcr.io/git-sync/git-sync
     tag: v3.3.0
     pullPolicy: IfNotPresent
+  crdSync:
+    repository: cdmikechen/airflow-dag-operator
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
 
 # Select certain nodes for airflow pods.
 nodeSelector: {}
@@ -1218,6 +1222,27 @@ dags:
     containerName: git-sync
     uid: 65533
     extraVolumeMounts: []
+    env: []
+    resources: {}
+    #  limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    #  requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  crdSync:
+    containerName: crd-sync
+    enabled: false
+    autoCreateCrd: true
+    maxThread: 2
+    logLevel: DEBUG
+    # Create ServiceAccount
+    serviceAccount:
+      # Specifies whether a ServiceAccount should be created
+      create: true
+      # The name of the ServiceAccount to use.
+      # If not set and create is true, a name is generated using the release name
+      name: ~
     env: []
     resources: {}
     #  limits:

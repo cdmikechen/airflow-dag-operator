@@ -130,6 +130,9 @@ spec:
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) }}
         {{- include "git_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
         {{- end }}
+        {{- if and (.Values.dags.crdSync.enabled) (not .Values.dags.persistence.enabled) }}
+        {{- include "crd_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
+        {{- end }}
         {{- if .Values.workers.extraInitContainers }}
         {{- toYaml .Values.workers.extraInitContainers | nindent 8 }}
         {{- end }}
@@ -173,7 +176,7 @@ spec:
               subPath: airflow_local_settings.py
               readOnly: true
             {{- end }}
-            {{- if or .Values.dags.persistence.enabled .Values.dags.gitSync.enabled }}
+            {{- if or .Values.dags.persistence.enabled .Values.dags.gitSync.enabled .Values.dags.crdSync.enabled }}
             {{- include "airflow_dags_mount" . | nindent 12 }}
             {{- end }}
           envFrom:
@@ -189,6 +192,9 @@ spec:
           {{- end }}
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) }}
         {{- include "git_sync_container" . | indent 8 }}
+        {{- end }}
+        {{- if and (.Values.dags.crdSync.enabled) (not .Values.dags.persistence.enabled) }}
+        {{- include "crd_sync_container" . | indent 8 }}
         {{- end }}
 {{- if $persistence }}
         - name: worker-log-groomer
@@ -276,6 +282,9 @@ spec:
         {{- if  .Values.dags.gitSync.sshKeySecret }}
         {{- include "git_sync_ssh_key_volume" . | indent 8 }}
         {{- end }}
+        {{- else if .Values.dags.crdSync.enabled }}
+        - name: dags
+          emptyDir: {}
         {{- end }}
 {{- if .Values.logs.persistence.enabled }}
         - name: logs

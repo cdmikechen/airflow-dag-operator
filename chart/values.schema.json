@@ -504,6 +504,32 @@
                             "default": "IfNotPresent"
                         }
                     }
+                },
+                "crdSync": {
+                    "description": "Configuration of the crdSync image.",
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "description": "The crdSync image repository.",
+                            "type": "string",
+                            "default": "cdmikechen/airflow-dag-operator"
+                        },
+                        "tag": {
+                            "description": "The crdSync image tag.",
+                            "type": "string",
+                            "default": "1.0.0"
+                        },
+                        "pullPolicy": {
+                            "description": "The crdSync image pull policy.",
+                            "type": "string",
+                            "enum": [
+                                "Always",
+                                "Never",
+                                "IfNotPresent"
+                            ],
+                            "default": "IfNotPresent"
+                        }
+                    }
                 }
             }
         },
@@ -2934,6 +2960,106 @@
                         },
                         "resources": {
                             "description": "Resources on workers git-sync sidecar",
+                            "type": "object",
+                            "default": {},
+                            "examples": [
+                                {
+                                    "limits": {
+                                        "cpu": "100m",
+                                        "memory": "128Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "100m",
+                                        "memory": "128Mi"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "crdSync": {
+                    "description": "CRD sync settings.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable CRD sync.",
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "containerName": {
+                            "description": "CRD sync container name.",
+                            "type": "string",
+                            "default": "crd-sync"
+                        },
+                        "autoCreateCrd": {
+                            "description": "Auto create CRD.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "maxThread": {
+                            "description": "Max quarkus thread.",
+                            "type": "integer",
+                            "default": 2
+                        },
+                        "logLevel": {
+                            "description": "Quarkus log level.",
+                            "type": "string",
+                            "default": "DEBUG"
+                        },
+                        "serviceAccount": {
+                            "description": "Create ServiceAccount.",
+                            "type": "object",
+                            "properties": {
+                                "create": {
+                                    "description": "Specifies whether a ServiceAccount should be created.",
+                                    "type": "boolean",
+                                    "default": true
+                                },
+                                "name": {
+                                    "description": "The name of the ServiceAccount to use. If not set and create is true, a name is generated using the release name.",
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "default": null
+                                },
+                                "annotations": {
+                                    "description": "Annotations to add to the worker Kubernetes ServiceAccount.",
+                                    "type": "object",
+                                    "default": {}
+                                }
+                            }
+                        },
+                        "env": {
+                            "description": "Environment variables for crd sync container.",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "value"
+                                ],
+                                "additionalProperties": false
+                            },
+                            "examples": [
+                                {
+                                    "name": "DAG_PATH",
+                                    "value": "/opt/airflow/dags"
+                                }
+                            ]
+                        },
+                        "resources": {
+                            "description": "Resources on workers crd-sync sidecar",
                             "type": "object",
                             "default": {},
                             "examples": [

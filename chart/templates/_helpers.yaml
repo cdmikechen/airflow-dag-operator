@@ -581,3 +581,52 @@ Create the name of the cleanup service account to use
   {{- $_ := set $config "auths" $auth -}}
   {{ $config | toJson | print }}
 {{- end }}
+
+{{ define "crd_sync_image" -}}
+{{ printf "%s:%s" .Values.images.crdSync.repository .Values.images.crdSync.tag }}
+{{- end }}
+
+
+{{/*
+Create the name of the airflow dag operator account to use
+*/}}
+{{- define "operator.serviceAccountName" -}}
+{{- if .Values.dags.crdSync.serviceAccount.create -}}
+{{ default (printf "%s-dag-operator" (include "airflow.fullname" .)) .Values.dags.crdSync.serviceAccount.name }}
+{{- else -}}
+{{ default "default" .Values.dags.crdSync.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*  CRD sync container */}}
+{{- define "crd_sync_container"}}
+- name: {{ .Values.dags.crdSync.containerName }}{{ if .is_init }}-init{{ end }}
+  image: {{ template "crd_sync_image" . }}
+  imagePullPolicy: {{ .Values.images.crdSync.pullPolicy }}
+  serviceAccountName: {{ include "operator.serviceAccountName" . }}
+  securityContext:
+    runAsUser: {{ .Values.uid }}
+  env:
+    {{- if .Values.dags.crdSync.autoCreateCrd }}
+    - name: CRD_AUTO_CREATE
+      value: {{ .Values.dags.crdSync.autoCreateCrd }}
+    {{- end }}
+    {{- if .Values.dags.crdSync.maxThread }}
+    - name: DAG_MAX_THREAD
+      value: {{ .Values.dags.crdSync.maxThread }}
+    {{- end }}
+    {{- if .Values.dags.crdSync.logLevel }}
+    - name: LOG_LEVEL
+      value: {{ .Values.dags.crdSync.logLevel }}
+    {{- end }}
+    - name: DAG_DEFAULT_USER
+      value: {{ .Values.uid }}
+    {{- range $i, $config := .Values.dags.crdSync.env }}
+    - name: {{ $config.name }}
+      value: {{ $config.value | quote }}
+    {{- end }}
+  resources: {{ toYaml .Values.dags.crdSync.resources | nindent 6 }}
+  volumeMounts:
+    - name: dags
+      mountPath: {{ (printf "%s/dags" .Values.airflowHome) }}
+{{- end }}
