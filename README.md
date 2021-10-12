@@ -1,9 +1,11 @@
 # Airflow Dag Operator
 
-Use K8s [CustomResourceDefinition](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/) to replace Airflow Git Sync strategy.
-The main idea of the project is to start a synchronization service with quarkus operator on each airflow pod to synchronize the DAG/files into the DAG folder.
+Use K8s [CustomResourceDefinition](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/) 
+to replace Airflow Git Sync strategy. The main idea of the project is to start a synchronization service 
+with quarkus operator on each airflow pod to synchronize the DAG/files into the DAG folder.
 
-This project has included the docker image packaging part (buildconfig or quarkus build) and the modified helm chart template based on the official airflow project (https://github.com/apache/airflow/tree/main/chart).
+This project has included the docker image packaging part (buildconfig or quarkus build) 
+and the modified helm chart template based on the official airflow project (https://github.com/apache/airflow/tree/main/chart).
 
 ## Operation Strategy
 
@@ -34,3 +36,13 @@ Or, if we don't have GraalVM installed, we can run the native executable build i
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 docker build -f src/main/docker/Dockerfile.native -t quarkus/airflow-dag-operator .
 ```
+
+## Airflow Helm Chart
+
+Helm dependency update to add postgresql chart and `lint`. We need helm3 to build.
+```shell script
+helm dep update
+helm lint
+```
+
+
