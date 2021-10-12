@@ -27,6 +27,8 @@ spec:
                   type: string
                 content:
                   type: string
+                dag_name:
+                  type: string
                 file_name:
                   type: string
               type: object

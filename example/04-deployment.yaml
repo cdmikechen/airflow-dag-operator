@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-dag-operator
+  namespace: bigdata
+spec:
+  selector:
+    matchLabels:
+      app: airflow-dag-operator
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: airflow-dag-operator
+    spec:
+      containers:
+        - name: airflow-dag-operator
+          image: quarkus/airflow-dag-operator
+      serviceAccountName: airflow-dag-operator
+      volumeMounts:
+        - mountPath: /opt/airflow/dags
+          name: dag-volume
+    volumes:
+      - name: dag-volume
+        emptyDir: {}

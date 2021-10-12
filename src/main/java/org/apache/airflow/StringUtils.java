@@ -3,7 +3,7 @@ package org.apache.airflow;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class MD5Util {
+public class StringUtils {
 
     public static String crypt(String str) throws NoSuchAlgorithmException {
         if (str == null || str.length() == 0) {
@@ -21,5 +21,15 @@ public class MD5Util {
             }
         }
         return hexString.toString();
+    }
+
+    public static boolean equals(final Object object1, final Object object2) {
+        if (object1 == object2) {
+            return true;
+        }
+        if (object1 == null || object2 == null) {
+            return false;
+        }
+        return object1.equals(object2);
     }
 }
