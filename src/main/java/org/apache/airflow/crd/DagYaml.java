@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class DagYaml {
 
     public DagYaml() {
@@ -27,6 +30,7 @@ public class DagYaml {
     @JsonProperty("default_args")
     private DefaultArg defaultArgs;
 
+    @RegisterForReflection
     public static class DefaultArg {
 
         public DefaultArg() {
@@ -259,6 +263,7 @@ public class DagYaml {
         }
     }
 
+    @RegisterForReflection
     public static class Config {
 
         public Config() {
@@ -355,6 +360,7 @@ public class DagYaml {
     }
 
     /* ------------------------ task ------------------------ */
+    @RegisterForReflection
     public static class Task {
 
         public Task() {
