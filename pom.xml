@@ -2,12 +2,6 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <parent>
-    <artifactId>quarkus-operator-sdk-parent</artifactId>
-    <groupId>io.quarkiverse.operatorsdk</groupId>
-    <version>2.0.0.Final-SNAPSHOT</version>
-  </parent>
-
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.airflow</groupId>
   <artifactId>airflow-dag-operator</artifactId>
@@ -23,24 +17,32 @@
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>2.3.0.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+    <kubernetes-client.version>5.8.0</kubernetes-client.version>
   </properties>
-<!--  <dependencyManagement>-->
-<!--    <dependencies>-->
-<!--      <dependency>-->
-<!--        <groupId>${quarkus.platform.group-id}</groupId>-->
-<!--        <artifactId>${quarkus.platform.artifact-id}</artifactId>-->
-<!--        <version>${quarkus.platform.version}</version>-->
-<!--        <type>pom</type>-->
-<!--        <scope>import</scope>-->
-<!--      </dependency>-->
-<!--    </dependencies>-->
-<!--  </dependencyManagement>-->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-client-bom</artifactId>
+        <version>${kubernetes-client.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>${quarkus.platform.group-id}</groupId>
+        <artifactId>${quarkus.platform.artifact-id}</artifactId>
+        <version>${quarkus.platform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>io.quarkiverse.operatorsdk</groupId>
       <artifactId>quarkus-operator-sdk</artifactId>
-<!--      <version>2.0.0.CR1</version>-->
-      <version>2.0.0.Final-SNAPSHOT</version>
+      <version>2.0.0.CR1</version>
+<!--      <version>2.0.0.Final-SNAPSHOT</version>-->
     </dependency>
   </dependencies>
   <build>
