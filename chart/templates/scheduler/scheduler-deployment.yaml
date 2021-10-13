@@ -118,9 +118,6 @@ spec:
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "git_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
         {{- end }}
-        {{- if .Values.dags.crdSync.enabled }}
-        {{- include "crd_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
-        {{- end }}
         {{- if .Values.scheduler.extraInitContainers }}
         {{- toYaml .Values.scheduler.extraInitContainers | nindent 8 }}
         {{- end }}

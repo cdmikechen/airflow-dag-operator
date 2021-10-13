@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: airflow-dag-operator
-  namespace: bigdata
+  namespace: airflow
 spec:
   selector:
     matchLabels:

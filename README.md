@@ -41,14 +41,23 @@ docker build -f src/main/docker/Dockerfile.native -t quarkus/airflow-dag-operato
 
 Helm dependency update to add postgresql chart and `lint`. We need helm3 to build.
 ```shell script
+# dependency update
 helm dep update
+
+# lint
 helm lint
+
+# debug
+helm install --dry-run --debug  -f values.yaml airflow -n airflow .
 ```
 
 Deploy Chart
 ```shell script
 # install
-helm install -f values-test.yaml airflow -n airflow .
+helm install -f values.yaml airflow -n airflow .
+
+# upgrade
+helm upgrade -f values.yaml airflow -n airflow .
 
 # uninstall
 helm uninstall airflow

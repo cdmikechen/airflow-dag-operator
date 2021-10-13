@@ -238,7 +238,7 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{ define "statsd_image" -}}
-{{ printf "%s:%s" .Values.images.statsd.repository .Values.images.statsd.tag }}
+{{ printf "%s:%s" (.Values.images.statsd.repository | default .Values.defaultAirflowRepository) .Values.images.statsd.tag }}
 {{- end }}
 
 {{ define "redis_image" -}}
@@ -586,41 +586,24 @@ Create the name of the cleanup service account to use
 {{ printf "%s:%s" .Values.images.crdSync.repository .Values.images.crdSync.tag }}
 {{- end }}
 
-
-{{/*
-Create the name of the airflow dag operator account to use
-*/}}
-{{- define "operator.serviceAccountName" -}}
-{{- if .Values.dags.crdSync.serviceAccount.create -}}
-{{ default (printf "%s-dag-operator" (include "airflow.fullname" .)) .Values.dags.crdSync.serviceAccount.name }}
-{{- else -}}
-{{ default "default" .Values.dags.crdSync.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
 {{/*  CRD sync container */}}
 {{- define "crd_sync_container"}}
-- name: {{ .Values.dags.crdSync.containerName }}{{ if .is_init }}-init{{ end }}
+- name: {{ .Values.dags.crdSync.containerName }}
   image: {{ template "crd_sync_image" . }}
   imagePullPolicy: {{ .Values.images.crdSync.pullPolicy }}
-  serviceAccountName: {{ include "operator.serviceAccountName" . }}
   securityContext:
     runAsUser: {{ .Values.uid }}
   env:
-    {{- if .Values.dags.crdSync.autoCreateCrd }}
-    - name: CRD_AUTO_CREATE
-      value: {{ .Values.dags.crdSync.autoCreateCrd }}
-    {{- end }}
     {{- if .Values.dags.crdSync.maxThread }}
     - name: DAG_MAX_THREAD
-      value: {{ .Values.dags.crdSync.maxThread }}
+      value: {{ quote .Values.dags.crdSync.maxThread }}
     {{- end }}
     {{- if .Values.dags.crdSync.logLevel }}
     - name: LOG_LEVEL
-      value: {{ .Values.dags.crdSync.logLevel }}
+      value: {{ quote .Values.dags.crdSync.logLevel }}
     {{- end }}
     - name: DAG_DEFAULT_USER
-      value: {{ .Values.uid }}
+      value: {{ quote .Values.uid }}
     {{- range $i, $config := .Values.dags.crdSync.env }}
     - name: {{ $config.name }}
       value: {{ $config.value | quote }}

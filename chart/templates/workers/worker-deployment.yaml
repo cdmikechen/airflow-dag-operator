@@ -130,9 +130,6 @@ spec:
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) }}
         {{- include "git_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
         {{- end }}
-        {{- if and (.Values.dags.crdSync.enabled) (not .Values.dags.persistence.enabled) }}
-        {{- include "crd_sync_container" (dict "Values" .Values "is_init" "true") | nindent 8 }}
-        {{- end }}
         {{- if .Values.workers.extraInitContainers }}
         {{- toYaml .Values.workers.extraInitContainers | nindent 8 }}
         {{- end }}

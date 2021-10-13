@@ -2992,11 +2992,6 @@
                             "type": "string",
                             "default": "crd-sync"
                         },
-                        "autoCreateCrd": {
-                            "description": "Auto create CRD.",
-                            "type": "boolean",
-                            "default": true
-                        },
                         "maxThread": {
                             "description": "Max quarkus thread.",
                             "type": "integer",
@@ -3006,30 +3001,6 @@
                             "description": "Quarkus log level.",
                             "type": "string",
                             "default": "DEBUG"
-                        },
-                        "serviceAccount": {
-                            "description": "Create ServiceAccount.",
-                            "type": "object",
-                            "properties": {
-                                "create": {
-                                    "description": "Specifies whether a ServiceAccount should be created.",
-                                    "type": "boolean",
-                                    "default": true
-                                },
-                                "name": {
-                                    "description": "The name of the ServiceAccount to use. If not set and create is true, a name is generated using the release name.",
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ],
-                                    "default": null
-                                },
-                                "annotations": {
-                                    "description": "Annotations to add to the worker Kubernetes ServiceAccount.",
-                                    "type": "object",
-                                    "default": {}
-                                }
-                            }
                         },
                         "env": {
                             "description": "Environment variables for crd sync container.",

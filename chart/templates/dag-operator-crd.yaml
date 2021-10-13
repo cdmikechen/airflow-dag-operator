@@ -1,0 +1,176 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+################################
+## Airflow Dag Operator Role
+#################################
+{{- if .Values.dags.crdSync.enabled }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: dags.airflow.apache.org
+spec:
+  group: airflow.apache.org
+  names:
+    kind: Dag
+    plural: dags
+    singular: dag
+  scope: Namespaced
+  versions:
+    - name: v1
+      schema:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                path:
+                  type: string
+                type:
+                  enum:
+                    - dag_file
+                    - file
+                    - dag_yaml
+                  type: string
+                dag_yaml:
+                  properties:
+                    catchup:
+                      type: string
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                    default_args:
+                      properties:
+                        owner:
+                          type: string
+                        end_date:
+                          type: string
+                        pool:
+                          type: string
+                        retries:
+                          type: integer
+                        other_args:
+                          items:
+                            properties:
+                              value:
+                                type: string
+                              name:
+                                type: string
+                            type: object
+                          type: array
+                        email_on_retry:
+                          type: boolean
+                        queue:
+                          type: string
+                        on_success_callback:
+                          type: string
+                        trigger_rule:
+                          type: string
+                        email_on_failure:
+                          type: boolean
+                        retry_delay:
+                          type: string
+                        on_retry_callback:
+                          type: string
+                        priority_weight:
+                          type: integer
+                        wait_for_downstream:
+                          type: boolean
+                        start_date:
+                          type: string
+                        email:
+                          items:
+                            type: string
+                          type: array
+                        execution_timeout:
+                          type: string
+                        depends_on_past:
+                          type: boolean
+                        sla_miss_callback:
+                          type: string
+                        on_failure_callback:
+                          type: string
+                        sla:
+                          type: string
+                      type: object
+                    python_codes:
+                      type: string
+                    schedule_interval:
+                      type: string
+                    title:
+                      type: string
+                    dagrun_timeout:
+                      type: string
+                    import_libs:
+                      items:
+                        type: string
+                      type: array
+                    tasks:
+                      items:
+                        properties:
+                          retries:
+                            type: integer
+                          params:
+                            items:
+                              properties:
+                                value:
+                                  type: string
+                                name:
+                                  type: string
+                              type: object
+                            type: array
+                          operator:
+                            type: string
+                          other_params:
+                            items:
+                              properties:
+                                value:
+                                  type: string
+                                name:
+                                  type: string
+                              type: object
+                            type: array
+                          dependencies:
+                            items:
+                              type: string
+                            type: array
+                          depends_on_past:
+                            type: boolean
+                          task_id:
+                            type: string
+                          bash_command:
+                            type: string
+                          python_callable:
+                            type: string
+                        type: object
+                      type: array
+                    description:
+                      type: string
+                  type: object
+                content:
+                  type: string
+                dag_name:
+                  type: string
+                file_name:
+                  type: string
+              type: object
+            status:
+              type: object
+          type: object
+      served: true
+      storage: true
+{{- end }}

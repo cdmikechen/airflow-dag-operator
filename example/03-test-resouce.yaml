@@ -2,7 +2,7 @@ apiVersion: airflow.apache.org/v1
 kind: Dag
 metadata:
   name: example-bash-operator
-  namespace: bigdata
+  namespace: airflow
 spec:
   type: dag_file
   dag_name: example_bash_operator
@@ -74,7 +74,7 @@ apiVersion: airflow.apache.org/v1
 kind: Dag
 metadata:
   name: example-other-file
-  namespace: bigdata
+  namespace: airflow
 spec:
   type: file
   path: test_file/
@@ -86,7 +86,7 @@ apiVersion: airflow.apache.org/v1
 kind: Dag
 metadata:
   name: tutorial-yaml
-  namespace: bigdata
+  namespace: airflow
 spec:
   type: dag_yaml
   dag_name: tutorial
