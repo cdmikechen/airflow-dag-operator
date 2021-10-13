@@ -89,6 +89,8 @@ public class DagConsumer extends Thread {
             DagType type = spec.getType();
             switch (type) {
                 case file:
+                    filePath.append(dagService.getPath(spec.getPath()))
+                            .append(spec.getFileName());
                     break;
                 case dag_yaml:
                 case dag_file:
