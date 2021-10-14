@@ -15,7 +15,7 @@ import io.javaoperatorsdk.operator.api.DeleteControl;
 import io.javaoperatorsdk.operator.api.ResourceController;
 import io.javaoperatorsdk.operator.api.UpdateControl;
 
-@Controller(namespaces = Controller.WATCH_CURRENT_NAMESPACE)
+@Controller(namespaces = Controller.NULL)
 public class DagController implements ResourceController<Dag> {
 
     private static final Logger log = LoggerFactory.getLogger(DagController.class);
@@ -26,9 +26,10 @@ public class DagController implements ResourceController<Dag> {
     @Override
     public DeleteControl deleteResource(Dag dag, Context<Dag> context) {
         try {
-            log.info("Queue delete dag task [{}] ...", dag.getMetadata().getName());
-            dagQueue.push(new DagTask(dag.getMetadata().getName(), dag.getMetadata().getResourceVersion(),
-                    dag.getSpec(), ControlType.delete));
+            log.info("Queue delete dag task [{}/{}] ...",
+                    dag.getMetadata().getNamespace(), dag.getMetadata().getName());
+            dagQueue.push(new DagTask(dag.getMetadata().getNamespace(), dag.getMetadata().getName(),
+                    dag.getMetadata().getResourceVersion(), dag.getSpec(), ControlType.delete));
         } catch (InterruptedException e) {
             log.error("Error when queue task", e);
         }
@@ -38,9 +39,10 @@ public class DagController implements ResourceController<Dag> {
     @Override
     public UpdateControl<Dag> createOrUpdateResource(Dag dag, Context<Dag> context) {
         try {
-            log.info("Queue create/update dag task [{}] ...", dag.getMetadata().getName());
-            dagQueue.push(new DagTask(dag.getMetadata().getName(), dag.getMetadata().getResourceVersion(),
-                    dag.getSpec(), ControlType.create));
+            log.info("Queue create/update dag task [{}/{}] ...",
+                    dag.getMetadata().getNamespace(), dag.getMetadata().getName());
+            dagQueue.push(new DagTask(dag.getMetadata().getNamespace(), dag.getMetadata().getName(),
+                    dag.getMetadata().getResourceVersion(), dag.getSpec(), ControlType.create));
         } catch (InterruptedException e) {
             log.error("Error when queue task", e);
         }

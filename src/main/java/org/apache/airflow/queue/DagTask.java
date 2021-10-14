@@ -5,12 +5,15 @@ import org.apache.airflow.type.ControlType;
 
 public class DagTask {
 
-    public DagTask(String name, String version, DagSpec spec, ControlType type) {
+    public DagTask(String namespace, String name, String version, DagSpec spec, ControlType type) {
+        this.namespace = namespace;
         this.name = name;
         this.version = version;
         this.spec = spec;
         this.type = type;
     }
+
+    public final String namespace;
 
     public final String version;
 
