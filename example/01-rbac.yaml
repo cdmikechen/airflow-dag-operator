@@ -41,15 +41,6 @@ rules:
       - dags/status
     verbs: ["*"]
 
-  # Access to the built-in resources the operator manages
-  - apiGroups: [""]
-    resources: [secrets, configmaps, services]
-    verbs: [get, list, watch, patch, create, update, delete]
-
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: [get, list, watch, patch, create, update, delete]
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

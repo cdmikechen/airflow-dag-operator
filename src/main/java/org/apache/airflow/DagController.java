@@ -15,7 +15,7 @@ import io.javaoperatorsdk.operator.api.DeleteControl;
 import io.javaoperatorsdk.operator.api.ResourceController;
 import io.javaoperatorsdk.operator.api.UpdateControl;
 
-@Controller(namespaces = Controller.NULL)
+@Controller
 public class DagController implements ResourceController<Dag> {
 
     private static final Logger log = LoggerFactory.getLogger(DagController.class);

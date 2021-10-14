@@ -13,13 +13,13 @@ spec:
       labels:
         app: airflow-dag-operator
     spec:
+      serviceAccountName: airflow-dag-operator
       containers:
         - name: airflow-dag-operator
           image: quarkus/airflow-dag-operator
-      serviceAccountName: airflow-dag-operator
-      volumeMounts:
-        - mountPath: /opt/airflow/dags
-          name: dag-volume
-    volumes:
-      - name: dag-volume
-        emptyDir: {}
+          volumeMounts:
+            - mountPath: /opt/airflow/dags
+              name: dag-volume
+      volumes:
+        - name: dag-volume
+          emptyDir: {}
