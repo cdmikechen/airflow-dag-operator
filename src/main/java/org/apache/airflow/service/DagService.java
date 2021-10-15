@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,6 +21,8 @@ import org.apache.airflow.crd.DagSpec;
 import org.apache.airflow.queue.DagTask;
 import org.apache.airflow.queue.FilePath;
 import org.apache.airflow.type.DagType;
+import org.apache.airflow.util.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +87,7 @@ public class DagService {
     /**
      * Get dag file name. If fileName is null, use crd meta name
      *
-     * @param name dag crd meta name
+     * @param name     dag crd meta name
      * @param fileName dag file name
      */
     public String getDagFile(String name, String fileName) {
@@ -133,25 +139,50 @@ public class DagService {
         }
     }
 
+
+    @ConfigProperty(name = "quarkus.operator-sdk.namespaces")
+    Optional<String> namespaces;
+
+    /**
+     * @param path file path
+     * @return true: ignore/false: not ignore
+     */
+    private boolean checkIgnorePath(Path path) {
+        if (airflowConfig.ignorePath().isPresent()) {
+            return Pattern.matches(airflowConfig.ignorePath().get(), path.toString());
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Clear dags
      */
     public void clearDags() throws IOException {
         MixedOperation<Dag, KubernetesResourceList<Dag>, Resource<Dag>> dagClient = client.resources(Dag.class);
         List<Dag> dags = dagClient.inAnyNamespace().list().getItems();
-        log.trace("Found {} Dag CRDs", dags.size());
+
+        // namespace
+        List<String> scanNs = new ArrayList<>();
+        if (namespaces.isPresent() && StringUtils.notBlank(namespaces.get())) {
+            scanNs.addAll(Arrays.asList(namespaces.get().split(",")));
+            log.debug("Clear DAG in namespace {}", scanNs);
+        }
 
         // transform dags to path
         List<Path> dagPaths = dags.stream()
+                .filter(dag -> scanNs.isEmpty() || scanNs.contains(dag.getMetadata().getNamespace()))
                 .map(dag -> getFilePath(dag.getMetadata().getName(), dag.getSpec()).getFilePath())
                 .map(Paths::get)
                 .collect(Collectors.toList());
+        log.trace("Found {} DAG CRDs", dagPaths.size());
 
         // scan dags folder to compare
         String folderPath = airflowConfig.path();
         try (Stream<Path> paths = Files.walk(Paths.get(folderPath))) {
             List<Path> deletePaths = paths.filter(Files::isRegularFile)
-                    .filter(path -> !dagPaths.contains(path))
+                    // skip ignore path and not contain in dag paths
+                    .filter(path -> !checkIgnorePath(path) && !dagPaths.contains(path))
                     .collect(Collectors.toList());
             if (deletePaths.isEmpty()) {
                 log.info("No invalid DAG found!");
