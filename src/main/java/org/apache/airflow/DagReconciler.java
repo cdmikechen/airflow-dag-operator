@@ -2,6 +2,7 @@ package org.apache.airflow;
 
 import javax.inject.Inject;
 
+import io.javaoperatorsdk.operator.api.reconciler.*;
 import org.apache.airflow.crd.Dag;
 import org.apache.airflow.queue.DagQueue;
 import org.apache.airflow.queue.DagTask;
@@ -9,22 +10,17 @@ import org.apache.airflow.type.ControlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.javaoperatorsdk.operator.api.Context;
-import io.javaoperatorsdk.operator.api.Controller;
-import io.javaoperatorsdk.operator.api.DeleteControl;
-import io.javaoperatorsdk.operator.api.ResourceController;
-import io.javaoperatorsdk.operator.api.UpdateControl;
 
-@Controller
-public class DagController implements ResourceController<Dag> {
+@ControllerConfiguration
+public class DagReconciler implements Reconciler<Dag> {
 
-    private static final Logger log = LoggerFactory.getLogger(DagController.class);
+    private static final Logger log = LoggerFactory.getLogger(DagReconciler.class);
 
     @Inject
     DagQueue dagQueue;
 
     @Override
-    public DeleteControl deleteResource(Dag dag, Context<Dag> context) {
+    public DeleteControl cleanup(Dag dag, Context context) {
         try {
             log.info("Queue delete dag task [{}/{}] ...",
                     dag.getMetadata().getNamespace(), dag.getMetadata().getName());
@@ -33,11 +29,11 @@ public class DagController implements ResourceController<Dag> {
         } catch (InterruptedException e) {
             log.error("Error when queue task", e);
         }
-        return DeleteControl.DEFAULT_DELETE;
+        return DeleteControl.defaultDelete();
     }
 
     @Override
-    public UpdateControl<Dag> createOrUpdateResource(Dag dag, Context<Dag> context) {
+    public UpdateControl<Dag> reconcile(Dag dag, Context context) {
         try {
             log.info("Queue create/update dag task [{}/{}] ...",
                     dag.getMetadata().getNamespace(), dag.getMetadata().getName());

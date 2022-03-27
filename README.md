@@ -40,7 +40,7 @@ An example has been in `/example` folder. In `/example`, it includes `RBAC`，`C
 
 ## Quarkus Image Build
 
-If we use OpenShift, we can use `BuildConfig` to build a native image. 
+If we use OpenShift, we can use `BuildConfig` or `Tekton/Pipline` to build a native image. 
 Otherwise, we can create a native executable using:
 ```shell script
 ./mvnw package -Pnative
