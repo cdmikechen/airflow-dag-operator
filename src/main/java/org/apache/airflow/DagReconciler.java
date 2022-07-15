@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 @ControllerConfiguration
 public class DagReconciler implements Reconciler<Dag>, Cleaner<Dag> {
 
-    private static final Logger log = LoggerFactory.getLogger(DagReconciler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DagReconciler.class);
 
     @Inject
     DagQueue dagQueue;
@@ -22,12 +22,12 @@ public class DagReconciler implements Reconciler<Dag>, Cleaner<Dag> {
     @Override
     public DeleteControl cleanup(Dag dag, Context context) {
         try {
-            log.info("Queue delete dag task [{}/{}] ...",
+            LOGGER.info("Queue delete dag task [{}/{}] ...",
                     dag.getMetadata().getNamespace(), dag.getMetadata().getName());
             dagQueue.push(new DagTask(dag.getMetadata().getNamespace(), dag.getMetadata().getName(),
                     dag.getMetadata().getResourceVersion(), dag.getSpec(), ControlType.delete));
         } catch (InterruptedException e) {
-            log.error("Error when queue task", e);
+            LOGGER.error("Error when queue task", e);
         }
         return DeleteControl.defaultDelete();
     }
@@ -35,12 +35,12 @@ public class DagReconciler implements Reconciler<Dag>, Cleaner<Dag> {
     @Override
     public UpdateControl<Dag> reconcile(Dag dag, Context context) {
         try {
-            log.info("Queue create/update dag task [{}/{}] ...",
+            LOGGER.info("Queue create/update dag task [{}/{}] ...",
                     dag.getMetadata().getNamespace(), dag.getMetadata().getName());
             dagQueue.push(new DagTask(dag.getMetadata().getNamespace(), dag.getMetadata().getName(),
                     dag.getMetadata().getResourceVersion(), dag.getSpec(), ControlType.create));
         } catch (InterruptedException e) {
-            log.error("Error when queue task", e);
+            LOGGER.error("Error when queue task", e);
         }
         return UpdateControl.noUpdate();
     }

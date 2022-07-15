@@ -29,4 +29,8 @@ public interface AirflowConfig {
 
     @WithName("scheduler-resource-type")
     String schedulerResourceType();
+
+    @WithName("scheduler-scan-interval")
+    @WithDefault("300")
+    Integer schedulerScanInterval();
 }

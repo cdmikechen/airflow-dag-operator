@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class DagQueue {
 
-    private static final Logger log = LoggerFactory.getLogger(DagQueue.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DagQueue.class);
 
     private final BlockingQueue<DagTask> dagQueue;
 
@@ -22,7 +22,7 @@ public class DagQueue {
         this.dagQueue = new LinkedBlockingDeque<>();
         int maxThread = airflowConfig.maxThread();
         for (int i = 0; i < maxThread; i++) {
-            log.info("Start DagConsumer-Thread-{}", i);
+            LOGGER.info("Start DagConsumer-Thread-{}", i);
             new DagConsumer(dagService, airflowConfig, datasourceService, dagQueue, i).start();
         }
     }

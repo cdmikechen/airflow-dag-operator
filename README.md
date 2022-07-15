@@ -81,7 +81,18 @@ helm upgrade -f values.yaml airflow -n airflow .
 helm uninstall airflow
 ```
 
-## History
+## Support pause
+
+We need to rebuild the image
+```shell
+# if want to support pause, we need to build by change `quarkus.datasource.jdbc` from false to true
+./mvnw package -Pnative -Dquarkus.datasource.jdbc=true
+```
+
+Due to the complexity of parsing DAG's python codes, we need to ensure that `dag_name` and `dag_id` are consistent for now.  
+Note that the helm has not been modified yet right now! by design, the operator will only turn on `support pause` on the scheduler node to avoid repeated executions.
+
+# History
 
 * 2021-10-09 1.0.0 First Commit 
 * 2021-11-16 1.0.1 Update to quarkus-operator-sdk 2.0.0

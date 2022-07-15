@@ -20,17 +20,17 @@ import io.quarkus.runtime.StartupEvent;
 @ApplicationScoped
 public class ClearService {
 
-    private static final Logger log = LoggerFactory.getLogger(ClearService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClearService.class);
 
     @Inject
     DagService dagService;
 
     public void onStart(@Observes StartupEvent ev) {
-        log.info("Clearing useless DAGs ...");
+        LOGGER.info("Clearing useless DAGs ...");
         try {
             dagService.clearDags();
         } catch (IOException e) {
-            log.error("Error when clearing useless DAGs!", e);
+            LOGGER.error("Error when clearing useless DAGs!", e);
         }
     }
 }

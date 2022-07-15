@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public enum DagCache {
 
-    INSTANCE;
+    CACHE;
 
     private final Map<String, DagInstance> cacheMap = new HashMap<>();
 

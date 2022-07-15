@@ -15,10 +15,6 @@ import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import io.fabric8.kubernetes.api.model.LabelSelector;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.client.dsl.*;
 import org.apache.airflow.AirflowConfig;
 import org.apache.airflow.crd.Dag;
@@ -145,7 +141,6 @@ public class DagService {
                 return spec.getContent();
         }
     }
-
 
     @ConfigProperty(name = "quarkus.operator-sdk.namespaces")
     Optional<String> namespaces;
