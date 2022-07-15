@@ -1,5 +1,5 @@
 ####
-# This Dockerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode
+# This Dockerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode.
 #
 # Before building the container image run:
 #
@@ -7,21 +7,21 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.native -t quarkus/airflow-dag-operator .
+# docker build -f src/main/docker/Dockerfile.native -t quarkus/bigdata-operator .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/airflow-dag-operator
+# docker run -i --rm -p 8080:8080 quarkus/bigdata-operator
 #
 ###
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.4
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5
 WORKDIR /work/
-RUN chown 50000 /work \
+RUN chown 1001 /work \
     && chmod "g+rwX" /work \
-    && chown 50000:root /work
-COPY --chown=50000:root target/*-runner /work/application
+    && chown 1001:root /work
+COPY --chown=1001:root target/*-runner /work/application
 
 EXPOSE 8080
-USER 50000
+USER 1001
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

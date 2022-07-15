@@ -27,6 +27,7 @@ Parameter | Description | Default
 `file_name` | If `type` is `file`, we need a `file_name`. |
 `dag_name` | If `type` is `dag_file` or `dag_yaml`, we need a `dag_name`. If `dag_name` don't have `.py` suffix, the operator will automatically append it. | crd name
 `content`| If `type` is `dag_file` or `file`, It is the content of the file. |
+`paused`| If `paused` is not empty, the operator will scan the DAG status and automatically pause / unpause the task. |
 `dag_yaml`| The described of DAG by yaml, For details, please refer to [dag-factory](https://github.com/ajbosco/dag-factory) |
 
 ## Dev Or Test
@@ -80,4 +81,10 @@ helm upgrade -f values.yaml airflow -n airflow .
 helm uninstall airflow
 ```
 
+## History
+
+* 2021-10-09 1.0.0 First Commit 
+* 2021-11-16 1.0.1 Update to quarkus-operator-sdk 2.0.0
+* 2022-03-27 1.0.1 Update to quarkus-operator-sdk 3.0.5
+* 2022-07-15 1.0.2 Update to quarkus-operator-sdk 4.0.0.RC / Support paused 
 

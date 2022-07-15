@@ -50,4 +50,19 @@ public class DagTask {
     public void setType(ControlType type) {
         this.type = type;
     }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    @Override
+    public String toString() {
+        return "DagTask{" +
+                "namespace='" + namespace + '\'' +
+                ", version='" + version + '\'' +
+                ", name='" + name + '\'' +
+                ", spec=" + spec +
+                ", type=" + type +
+                '}';
+    }
 }

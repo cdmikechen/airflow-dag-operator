@@ -15,11 +15,17 @@ import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.client.dsl.*;
 import org.apache.airflow.AirflowConfig;
 import org.apache.airflow.crd.Dag;
 import org.apache.airflow.crd.DagSpec;
 import org.apache.airflow.queue.DagTask;
 import org.apache.airflow.queue.FilePath;
+import org.apache.airflow.service.pod.PodService;
 import org.apache.airflow.type.DagType;
 import org.apache.airflow.util.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -28,19 +34,20 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 
 @ApplicationScoped
 public class DagService {
 
-    private static final Logger log = LoggerFactory.getLogger(DagService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DagService.class);
 
     @Inject
     AirflowConfig airflowConfig;
 
     @Inject
     KubernetesClient client;
+
+    @Inject
+    PodService podService;
 
     /**
      * Delete file
@@ -166,7 +173,7 @@ public class DagService {
         List<String> scanNs = new ArrayList<>();
         if (namespaces.isPresent() && StringUtils.notBlank(namespaces.get())) {
             scanNs.addAll(Arrays.asList(namespaces.get().split(",")));
-            log.debug("Clear DAG in namespace {}", scanNs);
+            LOGGER.debug("Clear DAG in namespace {}", scanNs);
         }
 
         // transform dags to path
@@ -175,7 +182,7 @@ public class DagService {
                 .map(dag -> getFilePath(dag.getMetadata().getName(), dag.getSpec()).getFilePath())
                 .map(Paths::get)
                 .collect(Collectors.toList());
-        log.trace("Found {} DAG CRDs", dagPaths.size());
+        LOGGER.trace("Found {} DAG CRDs", dagPaths.size());
 
         // scan dags folder to compare
         String folderPath = airflowConfig.path();
@@ -185,13 +192,26 @@ public class DagService {
                     .filter(path -> !checkIgnorePath(path) && !dagPaths.contains(path))
                     .collect(Collectors.toList());
             if (deletePaths.isEmpty()) {
-                log.info("No invalid DAG found!");
+                LOGGER.info("No invalid DAG found!");
             } else {
                 for (Path deletePath : deletePaths) {
-                    log.warn("Delete useless DAG in path {}", deletePath);
+                    LOGGER.warn("Delete useless DAG in path {}", deletePath);
                     Files.delete(deletePath);
                 }
             }
+        }
+    }
+
+    /**
+     * Pause or start DAG. Considering that the scheduler may lock the table,
+     * we will call the scheduler's pod and use the airflow command to operate.
+     */
+    public void pauseDag(String dagId, boolean paused) {
+        if (airflowConfig.schedulerResourceName().isPresent()) {
+            podService.pauseDag(airflowConfig.schedulerResourceName().get(), airflowConfig.schedulerResourceType(),
+                    dagId, paused);
+        } else {
+            LOGGER.warn("airflow scheduler resource name is empty, skip {} pause operate!", dagId);
         }
     }
 }

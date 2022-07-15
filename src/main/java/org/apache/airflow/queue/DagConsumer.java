@@ -6,11 +6,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.airflow.AirflowConfig;
 import org.apache.airflow.cache.DagCache;
 import org.apache.airflow.cache.DagInstance;
 import org.apache.airflow.crd.DagSpec;
+import org.apache.airflow.database.AirflowDag;
+import org.apache.airflow.database.DatasourceService;
 import org.apache.airflow.service.DagService;
 import org.apache.airflow.type.ControlType;
 import org.apache.airflow.type.DagType;
@@ -20,16 +24,23 @@ import org.slf4j.LoggerFactory;
 
 public class DagConsumer extends Thread {
 
-    private static final Logger log = LoggerFactory.getLogger(DagConsumer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DagConsumer.class);
 
     private final DagService dagService;
+
+    private final AirflowConfig airflowConfig;
+
+    private final DatasourceService datasourceService;
 
     private final BlockingQueue<DagTask> dagQueue;
 
     private final int thread;
 
-    public DagConsumer(DagService dagService, BlockingQueue<DagTask> dagQueue, int thread) {
+    public DagConsumer(DagService dagService, AirflowConfig airflowConfig, DatasourceService datasourceService,
+                       BlockingQueue<DagTask> dagQueue, int thread) {
         this.dagService = dagService;
+        this.airflowConfig = airflowConfig;
+        this.datasourceService = datasourceService;
         this.dagQueue = dagQueue;
         this.thread = thread;
     }
@@ -50,23 +61,37 @@ public class DagConsumer extends Thread {
                     String name = task.getName();
                     long version = task.getVersionNum();
                     if (!DagCache.INSTANCE.contains(name)) {
-                        log.debug("Creating {} {} ...", task.getSpec().getType(), name);
+                        LOGGER.debug("Creating {} {} ...", task.getSpec().getType(), name);
                         createFile(task);
                     } else {
                         DagInstance oldTask = DagCache.INSTANCE.getInstance(name);
                         long lastVersion = oldTask.getVersion();
                         // Check if this version is larger than this version
                         if (lastVersion <= version) {
-                            log.debug("Updating {} {} ...", task.getSpec().getType(), name);
+                            LOGGER.debug("Updating {} {} ...", task.getSpec().getType(), name);
                             updateFile(task, oldTask);
                         } else {
-                            log.warn("Can not create dag {}, current version {}, cache version {}",
+                            LOGGER.warn("Can not create dag {}, current version {}, cache version {}",
                                     name, version, DagCache.INSTANCE.getInstance(name).getVersion());
+                            continue;
                         }
+                    }
+
+                    // If support pause
+                    if (task.getSpec().getType() != DagType.file && airflowConfig.supportPause()) {
+                        String dagId = task.getSpec().getDagName();
+                        Optional<AirflowDag> dag = datasourceService.getAirflowDag(dagId);
+                        dag.ifPresent(d -> {
+                            // If paused is different from airflow dag table, call the dag pause command
+                            if (!task.getSpec().getPaused().equals(d.isPaused())) {
+                                LOGGER.info("Need to set dag {} paused to {}", task.getName(), task.getSpec().getPaused());
+                                dagService.pauseDag(dagId, task.getSpec().getPaused());
+                            }
+                        });
                     }
                 }
             } catch (Exception e) {
-                log.error("Get Dag Queue error！", e);
+                LOGGER.error("Get Dag Queue error！", e);
             }
         }
     }
@@ -82,7 +107,7 @@ public class DagConsumer extends Thread {
             DagCache.INSTANCE.getInstance(name, task.getVersionNum())
                     .ifPresentOrElse(
                             dagInstance -> filePath.append(dagInstance.getFilePath()),
-                            () -> log.warn("Can not delete dag {}, current version {}, cache version {}",
+                            () -> LOGGER.warn("Can not delete dag {}, current version {}, cache version {}",
                                     name, task.getVersion(), DagCache.INSTANCE.getInstance(name).getVersion()));
         } else {
             DagSpec spec = task.getSpec();
@@ -102,7 +127,7 @@ public class DagConsumer extends Thread {
         }
 
         if (filePath.length() > 0) {
-            log.info("Delete dag {} in path {}", name, filePath);
+            LOGGER.info("Delete dag {} in path {}", name, filePath);
             dagService.deleteFilePath(filePath.toString());
         }
     }
@@ -131,7 +156,7 @@ public class DagConsumer extends Thread {
         createFileContent(filePath, fileName, content);
 
         // save cache
-        log.trace("Saving to cache {}", di);
+        LOGGER.trace("Saving to cache {}", di);
         DagCache.INSTANCE.cache(name, di);
     }
 
@@ -160,47 +185,47 @@ public class DagConsumer extends Thread {
         String newPath = filePath + fileName;
         if (!oldPath.equals(newPath)) {
             // 1. path or file name had been changed, need to remove old file
-            log.info("Need to delete old dag {} in path {}", name, oldPath);
+            LOGGER.info("Need to delete old dag {} in path {}", name, oldPath);
             dagService.deleteFilePath(oldPath);
 
-            log.info("Create new dag {} in path {}", name, oldPath);
+            LOGGER.info("Create new dag {} in path {}", name, oldPath);
             createFileContent(filePath, fileName, newContent);
         } else {
             Path newFile = Paths.get(newPath);
             if (!Files.exists(newFile)) {
                 // 2. if file not exists, create it
-                log.info("Can not find exists dag, create it!");
+                LOGGER.info("Can not find exists dag, create it!");
                 createFileContent(filePath, fileName, newContent);
             } else {
                 // 3. content had been changed, just use createFile method
                 if (StringUtils.equals(newContent, oldTask.getContent())) {
-                    log.debug("There is no difference between old and new contents!");
+                    LOGGER.debug("There is no difference between old and new contents!");
                 } else {
-                    log.info("The two contents are different, and the file needs to be rewritten!");
+                    LOGGER.info("The two contents are different, and the file needs to be rewritten!");
                     createFileContent(filePath, fileName, newContent);
                 }
             }
         }
 
         // save cache
-        log.trace("Saving to cache {}", di);
+        LOGGER.trace("Saving to cache {}", di);
         DagCache.INSTANCE.cache(name, di);
     }
 
     /**
      * Create dag file
      *
-     * @param path file path
+     * @param path     file path
      * @param fileName file name
-     * @param content file content
+     * @param content  file content
      */
     private void createFileContent(String path, String fileName, String content) {
-        log.info("Create {} stored in {} and content \n{}", fileName, path, content);
+        LOGGER.info("Create {} stored in {} and content \n{}", fileName, path, content);
         try {
             // create folder if not exists
             Path folderFile = Paths.get(path);
             if (!Files.exists(folderFile)) {
-                log.debug("Folder not exists, create folder {} ...", path);
+                LOGGER.debug("Folder not exists, create folder {} ...", path);
                 Files.createDirectories(folderFile);
             }
 
@@ -208,7 +233,7 @@ public class DagConsumer extends Thread {
             String filePath = path + fileName;
             bufferedWriter(filePath, content);
         } catch (IOException e) {
-            log.error("Dag file error！", e);
+            LOGGER.error("Dag file error！", e);
         }
     }
 
@@ -216,9 +241,9 @@ public class DagConsumer extends Thread {
      * write dag
      */
     private void bufferedWriter(String filepath, String content) throws IOException {
-        log.debug("Saving dag file to {} ...", filepath);
+        LOGGER.debug("Saving dag file to {} ...", filepath);
         try (FileWriter fileWriter = new FileWriter(filepath);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
             bufferedWriter.write(content);
         }
     }

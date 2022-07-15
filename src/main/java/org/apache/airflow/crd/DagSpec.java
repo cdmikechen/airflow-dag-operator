@@ -15,6 +15,13 @@ public class DagSpec {
 
     private String path;
 
+    /**
+     * This is an experimental configuration that turns the dag on/off after synchronizing the dag,
+     * depending on the actual enable value.
+     * This configuration is currently supported only on the scheduler node.
+     */
+    private Boolean paused = false;
+
     @JsonProperty("file_name")
     private String fileName;
 
@@ -72,5 +79,26 @@ public class DagSpec {
 
     public void setDagYaml(DagYaml dagYaml) {
         this.dagYaml = dagYaml;
+    }
+
+    public Boolean getPaused() {
+        return paused;
+    }
+
+    public void setPaused(Boolean paused) {
+        this.paused = paused;
+    }
+
+    @Override
+    public String toString() {
+        return "DagSpec{" +
+                "type=" + type +
+                ", path='" + path + '\'' +
+                ", paused=" + paused +
+                ", fileName='" + fileName + '\'' +
+                ", dagName='" + dagName + '\'' +
+                ", content='" + content + '\'' +
+                ", dagYaml=" + dagYaml +
+                '}';
     }
 }

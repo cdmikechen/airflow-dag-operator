@@ -144,6 +144,8 @@ spec:
                   type: string
                 dag_name:
                   type: string
+                paused:
+                  type: boolean
                 file_name:
                   type: string
               type: object

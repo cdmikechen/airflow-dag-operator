@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 
 @ControllerConfiguration
-public class DagReconciler implements Reconciler<Dag> {
+public class DagReconciler implements Reconciler<Dag>, Cleaner<Dag> {
 
     private static final Logger log = LoggerFactory.getLogger(DagReconciler.class);
 

@@ -1,4 +1,4 @@
-package org.apache.airflow.service;
+package org.apache.airflow.service.startup;
 
 import java.io.IOException;
 
@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.apache.airflow.service.DagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
