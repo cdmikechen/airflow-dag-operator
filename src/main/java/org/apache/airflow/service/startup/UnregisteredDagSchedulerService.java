@@ -93,7 +93,7 @@ public class UnregisteredDagSchedulerService {
                 LOGGER.info("The scan interval has been exceeded, try to delete the cache {}", name);
                 UnregisteredDagCache.CACHE.remove(name, udi);
             } else {
-                LOGGER.debug("Check if dag {} has been registered (last check time: {})", udi.getDagId(),
+                LOGGER.trace("Check if dag {} has been registered (last check time: {})", udi.getDagId(),
                         new Timestamp(udi.getLastCheckTime() == null ? udi.getCreateTime() : udi.getLastCheckTime()));
                 Optional<AirflowDag> dag = datasourceService.getAirflowDag(udi.getDagId());
                 dag.ifPresentOrElse(d -> {
